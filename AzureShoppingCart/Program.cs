@@ -5,13 +5,21 @@ using AzureShoppingCart.Data.Interceptors;
 using AzureShoppingCart.Extensions;
 using AzureShoppingCart.Identity;
 using AzureShoppingCart.Identity.Seed;
+using AzureShoppingCart.Interfaces;
 using AzureShoppingCart.Middlewares;
+using AzureShoppingCart.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+});
 
 builder.Services
     .AddOpenApi("v1", options => options.AddScalarTransformers())
@@ -35,6 +43,8 @@ builder.Services.AddScoped<AuditableInterceptor>();
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddTransient<ILinkService, LinkService>();
+
 builder.Services.AddScoped<IUserContext, UserContext>();
 
 builder.Services.ConfigureOptions<SeedAdminOptionsSetup>();
@@ -45,6 +55,8 @@ builder.Services.AddDbContext<ApplicationDbContext>((sp, options) => options
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddProblemDetails();
 

@@ -16,18 +16,13 @@ namespace AzureShoppingCart.Common
                 new SuccessResponse<T>(value, StatusCodes.Status201Created));
         public static NoContent NoContent() => TypedResults.NoContent();
 
-        public static ProblemHttpResult Problem(Result result)
+        public static ProblemHttpResult Problem(Error error)
         {
-            if (result.IsSuccess)
-            {
-                throw new InvalidOperationException();
-            }
-
             return TypedResults.Problem(
-                title: GetTitle(result.Error),
-                detail: GetDetail(result.Error),
-                type: GetType(result.Error.Type),
-                statusCode: GetStatusCode(result.Error.Type));
+                title: GetTitle(error),
+                detail: GetDetail(error),
+                type: GetType(error.Type),
+                statusCode: GetStatusCode(error.Type));
 
             static string GetTitle(Error error) =>
                 error.Type switch

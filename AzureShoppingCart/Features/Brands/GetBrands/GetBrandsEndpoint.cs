@@ -1,6 +1,6 @@
 ﻿using AzureShoppingCart.Common;
-using AzureShoppingCart.Entities;
 using AzureShoppingCart.Interfaces;
+using MediatR;
 
 namespace AzureShoppingCart.Features.Brands.GetBrands;
 
@@ -8,11 +8,11 @@ public sealed class GetBrandsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("brands", async (CancellationToken cancellationToken) =>
+        app.MapGet("brands", async (ISender sender) =>
         {
-            ICollection<Brand> data = [new Brand { Id = 1, Name = "Huawei", Products = [] }];
+            var brands = await sender.Send(new GetBrandsQuery());
 
-            return ApiResults.Ok(data);
+            return ApiResults.Ok(brands);
         })
             .WithTags(EndpointTags.Brands)
             .MapToApiVersion(1);
