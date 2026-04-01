@@ -5,6 +5,7 @@ using AzureShoppingCart.Data.Interceptors;
 using AzureShoppingCart.Extensions;
 using AzureShoppingCart.Identity;
 using AzureShoppingCart.Identity.Seed;
+using AzureShoppingCart.Middlewares;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -49,7 +50,18 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddExceptionHandler<DevExceptionHandler>();
+}
+else
+{
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+}
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 ApiVersionSet apiVersionSet = app.NewApiVersionSet()
     .HasApiVersion(new ApiVersion(1))
