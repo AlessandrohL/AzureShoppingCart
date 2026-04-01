@@ -45,6 +45,8 @@ builder.Services.AddDbContext<ApplicationDbContext>((sp, options) => options
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddProblemDetails();
+
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
 var app = builder.Build();

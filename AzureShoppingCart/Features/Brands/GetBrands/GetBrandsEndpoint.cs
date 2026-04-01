@@ -12,7 +12,7 @@ public sealed class GetBrandsEndpoint : IEndpoint
         {
             ICollection<Brand> data = [new Brand { Id = 1, Name = "Huawei", Products = [] }];
 
-            return Results.Ok(data);
+            return ApiResults.Ok(data);
         })
             .WithTags(EndpointTags.Brands)
             .MapToApiVersion(1);
