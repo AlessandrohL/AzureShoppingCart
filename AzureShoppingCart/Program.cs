@@ -7,9 +7,11 @@ using AzureShoppingCart.Identity;
 using AzureShoppingCart.Identity.Seed;
 using AzureShoppingCart.Interfaces;
 using AzureShoppingCart.Middlewares;
+using AzureShoppingCart.Options.Setups;
 using AzureShoppingCart.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Scalar.AspNetCore;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -43,6 +45,8 @@ builder.Services.AddScoped<AuditableInterceptor>();
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddAntiforgery();
+
 builder.Services.AddTransient<ILinkService, LinkService>();
 
 builder.Services.AddScoped<IUserContext, UserContext>();
@@ -57,6 +61,18 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+builder.Services.AddAzureClients(clientBuilder =>
+{
+    string connectionString = builder.Configuration["Azure:Storage:Blob:ConnectionString"]!;
+
+    clientBuilder.AddBlobServiceClient(connectionString)
+        .WithName("Images");
+});
+
+builder.Services.ConfigureOptions<BlobStorageSetup>();
+
+builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
 
 builder.Services.AddProblemDetails();
 
@@ -74,6 +90,8 @@ else
 var app = builder.Build();
 
 app.UseExceptionHandler();
+
+app.UseAntiforgery();
 
 ApiVersionSet apiVersionSet = app.NewApiVersionSet()
     .HasApiVersion(new ApiVersion(1))
