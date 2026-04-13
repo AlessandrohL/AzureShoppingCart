@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace AzureShoppingCart.Features.Brands.GetBrandById;
 
+using GetBrandByIdResult = Results<
+    Ok<SuccessResponse<GetBrandByIdResponse>>,
+    ProblemHttpResult>;
+
 public sealed class GetBrandByIdEndpoint : IEndpoint
 {
     public static readonly string Name = "GetBrandById";
@@ -12,7 +16,7 @@ public sealed class GetBrandByIdEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("brands/{brandId}",
-            async Task<Results<Ok<SuccessResponse<GetBrandByIdResponse>>, ProblemHttpResult>> (int brandId, ISender sender) =>
+            async Task<GetBrandByIdResult> (int brandId, ISender sender) =>
         {
             var result = await sender.Send(new GetBrandByIdQuery(brandId));
 
