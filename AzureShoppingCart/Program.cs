@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Asp.Versioning.Builder;
+using Azure.Identity;
 using AzureShoppingCart.Data;
 using AzureShoppingCart.Data.Interceptors;
 using AzureShoppingCart.Extensions;
@@ -64,10 +65,15 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 
 builder.Services.AddAzureClients(clientBuilder =>
 {
-    string connectionString = builder.Configuration["Azure:Storage:Blob:ConnectionString"]!;
+    clientBuilder.AddBlobServiceClient(
+        serviceUri: new Uri(builder.Configuration["Azure:Storage:Blob:Uri"]!))
+    .WithName("Images");
 
-    clientBuilder.AddBlobServiceClient(connectionString)
-        .WithName("Images");
+    var credential = new ChainedTokenCredential(
+        new AzureCliCredential(),
+        new ManagedIdentityCredential(ManagedIdentityId.SystemAssigned));
+
+    clientBuilder.UseCredential(credential);
 });
 
 builder.Services.ConfigureOptions<BlobStorageSetup>();
