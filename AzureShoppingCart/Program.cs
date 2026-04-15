@@ -81,18 +81,24 @@ builder.Services.AddFluentValidationAutoValidation();
 
 ValidatorOptions.Global.LanguageManager.Culture = new CultureInfo("es");
 
+var credential = new ChainedTokenCredential(
+        new AzureCliCredential(),
+        new ManagedIdentityCredential(ManagedIdentityId.SystemAssigned));
+
 builder.Services.AddAzureClients(clientBuilder =>
 {
     clientBuilder.AddBlobServiceClient(
         serviceUri: new Uri(builder.Configuration["Azure:Storage:Blob:Uri"]!))
     .WithName("Images");
 
-    var credential = new ChainedTokenCredential(
-        new AzureCliCredential(),
-        new ManagedIdentityCredential(ManagedIdentityId.SystemAssigned));
+    clientBuilder.AddSecretClient(vaultUri: new Uri(builder.Configuration["Azure:KeyVault:Uri"]!));
 
     clientBuilder.UseCredential(credential);
 });
+
+builder.Configuration.AddAzureKeyVault(
+    vaultUri: new Uri(builder.Configuration["Azure:KeyVault:Uri"]!),
+    credential: credential);
 
 builder.Services.ConfigureOptions<BlobStorageSetup>();
 
