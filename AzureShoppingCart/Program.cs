@@ -8,13 +8,21 @@ using AzureShoppingCart.Identity;
 using AzureShoppingCart.Identity.Seed;
 using AzureShoppingCart.Interfaces;
 using AzureShoppingCart.Middlewares;
+using AzureShoppingCart.OpenApi;
 using AzureShoppingCart.Options.Setups;
 using AzureShoppingCart.Services;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
+using System.Globalization;
 using System.Reflection;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,8 +33,12 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.Services
-    .AddOpenApi("v1", options => options.AddScalarTransformers())
-    .AddOpenApi("v2", options => options.AddScalarTransformers())
+    .AddOpenApi("v1", options => options
+        .AddScalarTransformers()
+        .AddDocumentTransformer<BearerSecuritySchemeTransformer>())
+    .AddOpenApi("v2", options => options
+        .AddScalarTransformers()
+        .AddDocumentTransformer<BearerSecuritySchemeTransformer>())
     .AddApiVersioning(options =>
     {
         options.DefaultApiVersion = new ApiVersion(1.0);
@@ -63,6 +75,12 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+builder.Services.AddFluentValidationAutoValidation();
+
+ValidatorOptions.Global.LanguageManager.Culture = new CultureInfo("es");
+
 builder.Services.AddAzureClients(clientBuilder =>
 {
     clientBuilder.AddBlobServiceClient(
@@ -79,6 +97,31 @@ builder.Services.AddAzureClients(clientBuilder =>
 builder.Services.ConfigureOptions<BlobStorageSetup>();
 
 builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
+
+builder.Services.ConfigureOptions<JwtSetup>();
+
+builder.Services.AddScoped<ClaimsIdentityProvider>();
+
+builder.Services.AddSingleton<TokenProvider>();
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!)),
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddProblemDetails();
 
@@ -97,6 +140,12 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
+
 app.UseAntiforgery();
 
 ApiVersionSet apiVersionSet = app.NewApiVersionSet()
@@ -107,7 +156,8 @@ ApiVersionSet apiVersionSet = app.NewApiVersionSet()
 
 RouteGroupBuilder versionedGroup = app
     .MapGroup("api/v{version:apiVersion}")
-    .WithApiVersionSet(apiVersionSet);
+    .WithApiVersionSet(apiVersionSet)
+    .AddFluentValidationAutoValidation();
 
 app.MapEndpoints(versionedGroup);
 
@@ -117,24 +167,41 @@ if (app.Environment.IsDevelopment())
 
     app.MapOpenApi();
 
-    app.MapScalarApiReference(options =>
-    {
-        options.Title = "Azure Shopping Cart";
-        options.Theme = ScalarTheme.Default;
-        options.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
-        options.CustomCss = "";
-        options.ShowSidebar = true;
-        options.DisableAgent();
-        options.AddDocuments(descriptors.Select((d, index) => new ScalarDocument(
+    //app.MapScalarApiReference(options =>
+    //{
+    //    options.Title = "Azure Shopping Cart";
+    //    options.Theme = ScalarTheme.Default;
+    //    options.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    //    options.CustomCss = "";
+    //    options.ShowSidebar = true;
+    //    options.DisableAgent();
+    //    options.AddDocuments(descriptors.Select((d, index) => new ScalarDocument(
+    //        Name: d.GroupName,
+    //        Title: d.GroupName,
+    //        IsDefault: index == descriptors.Count - 1)));
+    //    options.AddPreferredSecuritySchemes(JwtBearerDefaults.AuthenticationScheme);
+    //    options.EnablePersistentAuthentication();
+    //});
+
+    app.MapScalarApiReference(options => options
+        .WithTitle("Azure Shopping Cart API")
+        .WithTheme(ScalarTheme.Kepler)
+        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+        .DisableAgent()
+        .HideClientButton()
+        .AddDocuments(descriptors.Select((d, index) => new ScalarDocument(
             Name: d.GroupName,
             Title: d.GroupName,
-            IsDefault: index == descriptors.Count - 1)));
-    });
+            IsDefault: index == descriptors.Count - 1)))
+        .AddPreferredSecuritySchemes(JwtBearerDefaults.AuthenticationScheme)
+        .AddHttpAuthentication(JwtBearerDefaults.AuthenticationScheme, auth =>
+        {
+            auth.WithToken(string.Empty);
+        })
+        .EnablePersistentAuthentication());
 
     await app.ApplyMigrationsAsync();
     await app.SeedInitialDataAsync();
 }
-
-app.UseHttpsRedirection();
 
 app.Run();

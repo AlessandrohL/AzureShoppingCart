@@ -3,10 +3,12 @@ using MediatR;
 
 namespace AzureShoppingCart.Features.Products.CreateProduct;
 
-public record CreateProductCommand(
-    string Name,
-    string Description,
-    int BrandId,
-    decimal Price,
-    int Stock,
-    IFormFile Image) : IRequest<Result<int>>;
+public sealed class CreateProductCommand : IRequest<Result<int>>
+{
+    public string? Name { get; init; }
+    public string? Description { get; init; }
+    public int BrandId { get; init; }
+    public decimal Price { get; init; }
+    public int Stock { get; init; }
+    public IFormFile? Image { get; init; }
+}
