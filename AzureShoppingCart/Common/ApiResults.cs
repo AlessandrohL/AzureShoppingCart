@@ -18,11 +18,23 @@ namespace AzureShoppingCart.Common
 
         public static ProblemHttpResult Problem(Error error)
         {
-            return TypedResults.Problem(
+            var problem = TypedResults.Problem(
                 title: GetTitle(error),
                 detail: GetDetail(error),
                 type: GetType(error.Type),
                 statusCode: GetStatusCode(error.Type));
+
+            if (error is ValidationError validationError)
+            {
+                problem.ProblemDetails.Extensions["errors"] = validationError.Errors
+                    .GroupBy(e => e.Code)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(e => e.Description).ToArray()
+                    );
+            }
+
+            return problem;
 
             static string GetTitle(Error error) =>
                 error.Type switch

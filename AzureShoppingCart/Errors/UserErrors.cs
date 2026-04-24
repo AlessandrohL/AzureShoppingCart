@@ -8,4 +8,9 @@ public static class UserErrors
         "User.InvalidCredentials",
         "El correo electrónico o la contraseña son incorrectos.",
         ErrorType.Unauthorized);
+
+    public static readonly Error EmailAlreadyInUse = new(
+        "User.EmailAlreadyInUse",
+        "El correo electrónico ya está registrado.",
+        ErrorType.Conflict);
 }
