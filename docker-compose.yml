@@ -1,0 +1,26 @@
+services:
+  azureshoppingcart.api:
+    image: ${DOCKER_REGISTRY-}azureshoppingcartapi
+    container_name: azureshoppingcart.api
+    build:
+      context: .
+      dockerfile: AzureShoppingCart/Dockerfile
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+  
+  azureshoppingcart.database:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: azureshoppingcart.database
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=StarMap@Local20
+      - MSSQL_PID=Developer
+      - MSSQL_DB=AzureShoppingCart
+    volumes:
+      - azureshoppingcart_db_data:/var/opt/mssql
+    ports:
+      - "1433:1433"
+
+volumes: 
+  azureshoppingcart_db_data:

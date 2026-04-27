@@ -81,9 +81,7 @@ builder.Services.AddFluentValidationAutoValidation();
 
 ValidatorOptions.Global.LanguageManager.Culture = new CultureInfo("es");
 
-var credential = new ChainedTokenCredential(
-        new AzureCliCredential(),
-        new ManagedIdentityCredential(ManagedIdentityId.SystemAssigned));
+var credential = new DefaultAzureCredential();
 
 builder.Services.AddAzureClients(clientBuilder =>
 {

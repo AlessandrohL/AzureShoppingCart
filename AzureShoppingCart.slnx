@@ -1,3 +1,6 @@
 <Solution>
   <Project Path="AzureShoppingCart/AzureShoppingCart.csproj" />
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
 </Solution>
