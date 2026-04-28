@@ -94,9 +94,12 @@ builder.Services.AddAzureClients(clientBuilder =>
     clientBuilder.UseCredential(credential);
 });
 
-builder.Configuration.AddAzureKeyVault(
-    vaultUri: new Uri(builder.Configuration["Azure:KeyVault:Uri"]!),
-    credential: credential);
+if (builder.Environment.IsProduction())
+{
+    builder.Configuration.AddAzureKeyVault(
+        vaultUri: new Uri(builder.Configuration["Azure:KeyVault:Uri"]!),
+        credential: credential);
+}
 
 builder.Services.ConfigureOptions<BlobStorageSetup>();
 
@@ -170,22 +173,6 @@ if (app.Environment.IsDevelopment())
     var descriptors = app.DescribeApiVersions();
 
     app.MapOpenApi();
-
-    //app.MapScalarApiReference(options =>
-    //{
-    //    options.Title = "Azure Shopping Cart";
-    //    options.Theme = ScalarTheme.Default;
-    //    options.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    //    options.CustomCss = "";
-    //    options.ShowSidebar = true;
-    //    options.DisableAgent();
-    //    options.AddDocuments(descriptors.Select((d, index) => new ScalarDocument(
-    //        Name: d.GroupName,
-    //        Title: d.GroupName,
-    //        IsDefault: index == descriptors.Count - 1)));
-    //    options.AddPreferredSecuritySchemes(JwtBearerDefaults.AuthenticationScheme);
-    //    options.EnablePersistentAuthentication();
-    //});
 
     app.MapScalarApiReference(options => options
         .WithTitle("Azure Shopping Cart API")
