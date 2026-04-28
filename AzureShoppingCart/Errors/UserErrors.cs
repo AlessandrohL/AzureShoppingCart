@@ -11,6 +11,6 @@ public static class UserErrors
 
     public static readonly Error EmailAlreadyInUse = new(
         "User.EmailAlreadyInUse",
-        "El correo electrónico ya está registrado.",
+        "El correo electrónico ya se encuentra registrado.",
         ErrorType.Conflict);
 }
