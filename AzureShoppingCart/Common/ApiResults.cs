@@ -44,6 +44,7 @@ namespace AzureShoppingCart.Common
                     ErrorType.NotFound => error.Code,
                     ErrorType.Conflict => error.Code,
                     ErrorType.Unauthorized => error.Code,
+                    ErrorType.UnprocessableContent => error.Code,
                     _ => "Server failure"
                 };
 
@@ -55,6 +56,7 @@ namespace AzureShoppingCart.Common
                     ErrorType.NotFound => error.Description,
                     ErrorType.Conflict => error.Description,
                     ErrorType.Unauthorized => error.Description,
+                    ErrorType.UnprocessableContent => error.Description,
                     _ => "An unexpected error occurred"
                 };
 
@@ -66,6 +68,7 @@ namespace AzureShoppingCart.Common
                     ErrorType.NotFound => "https://tools.ietf.org/html/rfc7231#section-6.5.4",
                     ErrorType.Conflict => "https://tools.ietf.org/html/rfc7231#section-6.5.8",
                     ErrorType.Unauthorized => "https://datatracker.ietf.org/doc/html/rfc7235#section-3.1",
+                    ErrorType.UnprocessableContent => "https://httpwg.org/specs/rfc9110.html#status.422",
                     _ => "https://tools.ietf.org/html/rfc7231#section-6.6.1"
                 };
 
@@ -77,6 +80,7 @@ namespace AzureShoppingCart.Common
                     ErrorType.NotFound => StatusCodes.Status404NotFound,
                     ErrorType.Conflict => StatusCodes.Status409Conflict,
                     ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+                    ErrorType.UnprocessableContent => StatusCodes.Status422UnprocessableEntity,
                     _ => StatusCodes.Status500InternalServerError
                 };
         }

@@ -101,7 +101,7 @@ public static class DependencyInjection
                 serviceUri: new Uri(blobStorageOptions.Uri))
             .WithName("Images");
 
-            clientBuilder.AddSecretClient(vaultUri: new Uri(blobStorageOptions.Uri));
+            clientBuilder.AddSecretClient(vaultUri: new Uri(builder.Configuration["Azure:KeyVault:Uri"]!));
 
             clientBuilder.UseCredential(credential);
         });
@@ -176,6 +176,14 @@ public static class DependencyInjection
         builder.Services.AddScoped<ClaimsIdentityProvider>();
 
         builder.Services.AddSingleton<TokenProvider>();
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddCaching(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddStackExchangeRedisCache(options =>
+            options.Configuration = builder.Configuration.GetConnectionString("Cache"));
 
         return builder;
     }

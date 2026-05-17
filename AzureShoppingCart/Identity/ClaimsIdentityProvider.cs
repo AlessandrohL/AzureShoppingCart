@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AzureShoppingCart.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using System.Security.Claims;
 
 namespace AzureShoppingCart.Identity;
 
-public sealed class ClaimsIdentityProvider(UserManager<IdentityUser> userManager)
+public sealed class ClaimsIdentityProvider(
+    UserManager<IdentityUser> userManager,
+    ApplicationDbContext dbContext)
 {
     private const string RoleClaimName = "role"; 
 
@@ -23,6 +27,16 @@ public sealed class ClaimsIdentityProvider(UserManager<IdentityUser> userManager
         ]);
 
         claims.AddClaims(roles.Select(role => new Claim(RoleClaimName, role)));
+
+        if (roles.Contains(AuthRoles.Customer))
+        {
+            Guid customerId = await dbContext.Customers
+                .Where(c => c.IdentityId == user.Id)
+                .Select(c => c.Id)
+                .FirstOrDefaultAsync();
+
+            claims.AddClaim(new Claim(CustomClaims.CustomerIdentifier, customerId.ToString()));
+        }
 
         return claims;
     }

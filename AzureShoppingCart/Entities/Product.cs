@@ -19,4 +19,6 @@ public sealed class Product : IAuditable
     public string? CreatedBy { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
     public string? LastModifiedBy { get; set; }
+
+    public bool HasStock => Stock > 0;
 }

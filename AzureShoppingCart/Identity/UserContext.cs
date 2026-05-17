@@ -11,6 +11,19 @@ public sealed class UserContext(IHttpContextAccessor httpContextAccessor)
             .User?
             .FindFirstValue(ClaimTypes.NameIdentifier);
 
+    public Guid CustomerId
+    {
+        get
+        {
+            var value = httpContextAccessor
+                .HttpContext?
+                .User?
+                .FindFirstValue(CustomClaims.CustomerIdentifier);
+
+            return Guid.TryParse(value, out var id) ? id : Guid.Empty;
+        }
+    }
+
     public bool IsAuthenticated =>
         httpContextAccessor
             .HttpContext?

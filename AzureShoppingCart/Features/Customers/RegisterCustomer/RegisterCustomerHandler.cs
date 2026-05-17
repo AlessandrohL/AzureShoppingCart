@@ -6,7 +6,6 @@ using AzureShoppingCart.Extensions;
 using AzureShoppingCart.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using System.Data;
 
 namespace AzureShoppingCart.Features.Customers.RegisterCustomer;
 

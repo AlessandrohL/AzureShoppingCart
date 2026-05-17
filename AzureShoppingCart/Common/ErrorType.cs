@@ -8,4 +8,5 @@ public enum ErrorType
     NotFound = 3,
     Conflict = 4,
     Unauthorized = 5,
+    UnprocessableContent = 6
 }

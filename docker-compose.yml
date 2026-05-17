@@ -22,5 +22,12 @@ services:
     ports:
       - "1433:1433"
 
+  azureshoppingcart.cache:
+    image: redis:8.6.2
+    container_name: azureshoppingcart.cache
+    restart: always
+    ports:
+      - "6379:6379"
+
 volumes: 
   azureshoppingcart_db_data:

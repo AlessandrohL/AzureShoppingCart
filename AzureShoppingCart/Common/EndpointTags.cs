@@ -6,4 +6,5 @@ public static class EndpointTags
     public const string Products = "Products";
     public const string Users = "Users";
     public const string Customers = "Customers";
+    public const string Cart = "Cart";
 }

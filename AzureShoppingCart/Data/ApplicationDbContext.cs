@@ -13,7 +13,8 @@ public sealed class ApplicationDbContext(DbContextOptions options)
     public DbSet<Brand> Brands => Set<Brand>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
-
+    public DbSet<Cart> Carts => Set<Cart>();
+    public DbSet<CartItem> CartItems => Set<CartItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

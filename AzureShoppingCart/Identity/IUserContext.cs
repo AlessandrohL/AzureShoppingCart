@@ -4,4 +4,5 @@ public interface IUserContext
 {
     bool IsAuthenticated { get; }
     string? UserId { get; }
+    Guid CustomerId { get; }
 }

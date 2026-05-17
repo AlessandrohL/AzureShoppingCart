@@ -12,7 +12,8 @@ var builder = WebApplication.CreateBuilder(args)
     .AddDatabase()
     .AddAzureServices()
     .AddApplicationServices()
-    .AddAuthenticationServices();
+    .AddAuthenticationServices()
+    .AddCaching();
 
 var app = builder.Build();
 
