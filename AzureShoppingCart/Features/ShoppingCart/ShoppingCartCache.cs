@@ -1,4 +1,6 @@
-﻿namespace AzureShoppingCart.Features.ShoppingCart;
+﻿using System.Text.Json.Serialization;
+
+namespace AzureShoppingCart.Features.ShoppingCart;
 
 public sealed class ShoppingCartCache
 {
@@ -9,6 +11,9 @@ public sealed class ShoppingCartCache
     {
         return new ShoppingCartCache();
     }
+
+    [JsonIgnore]
+    public bool IsEmpty => Items.Count == 0;
 }
 
 public sealed class ShoppingCartItemCache
