@@ -11,6 +11,11 @@ public static class CartErrors
 
     public static Error InsufficientStock(string productName) => new(
         "Cart.InsufficientStock",
-        $"No hay suficiente stock para el producto '{productName}'.",
+        $"No hay suficiente stock para el producto '{productName}'",
         ErrorType.UnprocessableContent);
+
+    public static Error NotFound => new(
+        "Cart.NotFound",
+        "No se encontró un carrito asociado",
+        ErrorType.NotFound);
 }

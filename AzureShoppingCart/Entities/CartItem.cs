@@ -14,4 +14,9 @@ public sealed class CartItem
     {
         Quantity += quantity;
     }
+
+    public void SetQuantity(int quantity)
+    {
+        Quantity = quantity;
+    }
 }
